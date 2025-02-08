@@ -20,8 +20,8 @@ def play():
     pygame.display.set_caption("pinball")
     screen.fill((16, 16, 16))
     clock = pygame.time.Clock()
-    bigfont = pygame.font.Font("/Arcade/venv/assets/7seg.otf", 81)
-    bg = pygame.image.load("/Arcade/venv/assets/pinball_bg.png")
+    bigfont = pygame.font.Font("/Arcade/assets/7seg.otf", 81)
+    bg = pygame.image.load("/Arcade/assets/pinball_bg.png")
     del screensize
 
     # Game Variables
