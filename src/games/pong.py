@@ -11,9 +11,9 @@ def play():
     clock = pygame.time.Clock()
     gameopen = True
     size = 8
-    bigfont = pygame.font.Font("/Arcade/venv/assets/VT323-Regular.ttf", 128)
+    bigfont = pygame.font.Font("/Arcade/assets/VT323-Regular.ttf", 128)
     title_text = bigfont.render("PONG", False, (255, 255, 255))
-    smallfont = pygame.font.Font("/Arcade/venv/assets/VT323-Regular.ttf", 32)
+    smallfont = pygame.font.Font("/Arcade/assets/VT323-Regular.ttf", 32)
     message_text = smallfont.render("click to play", False, (255, 255, 255))
     difficulty = 2
 
