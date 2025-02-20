@@ -1,10 +1,9 @@
 import pygame
 from random import randint, random
+from math import sqrt
 
 
 def play():
-    from math import sqrt
-
     pygame.init()
 
     # Game Constants
@@ -20,18 +19,9 @@ def play():
     pygame.display.set_caption("pinball")
     screen.fill((16, 16, 16))
     clock = pygame.time.Clock()
-    bigfont = pygame.font.Font("/Arcade/assets/7seg.otf", 81)
-    bg = pygame.image.load("/Arcade/assets/pinball_bg.png")
+    bigfont = pygame.font.Font("/Users/adaaspirations/PycharmProjects/Arcade/venv/assets/7seg.otf", 81)
+    bg = pygame.image.load("/Users/adaaspirations/PycharmProjects/Arcade/venv/assets/pinball_bg.png")
     del screensize
-
-    # Game Variables
-    gameopen: bool = True
-    pinball: list[int] = []
-    score: int = 0
-    stuck: bool = False
-    flipper_l: bool = False
-    flipper_r: bool = False
-
     class Bumper:
         def __init__(self, x, y, points, magnetic, color):
             self.x = x
@@ -52,7 +42,7 @@ def play():
                 self.counter -= 1
             else:
                 self.color = (128, 128, 128)
-            if sqrt((pinball[0]-self.x)**2 + (pinball[1]-self.y)**2) < bumpersize:
+            if sqrt((pinball[0] - self.x) ** 2 + (pinball[1] - self.y) ** 2) < bumpersize:
                 self.stick = (pinball[0], pinball[1])
                 if self.wait > 0:
                     self.wait -= 1
@@ -61,11 +51,19 @@ def play():
                     pinball = [self.stick[0], self.stick[1], 0, 0]
                     stuck = True
                 else:
-                    pinball[2:3] = [(pinball[0]-self.x)+randint(-1, 1), (pinball[1]-self.y)+randint(-1, 1)]
+                    pinball[2:3] = [(pinball[0] - self.x) + randint(-1, 1), (pinball[1] - self.y) + randint(-1, 1)]
                     self.counter = self.points
                     if self.magnetic and randint(0, 3) == 0:
                         self.wait = self.counter
                     stuck = False
+
+    # Game Variables
+    gameopen: bool = True
+    pinball: list[int] = []
+    score: int = 0
+    stuck: bool = False
+    flipper_l: bool = False
+    flipper_r: bool = False
 
     while gameopen:
         pinball = [170, 30, 0, 0]
@@ -76,24 +74,27 @@ def play():
         running = True
         # Game
         while running:
+            if pinball[1] > 670:
+                running = False
             screen.blit(bg, (0, 0))
+
+            # Keyboard Input Detection
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
+                if event.type == pygame.KEYDOWN or event.type == pygame.KMOD_SHIFT:
                     if event.key == pygame.K_q:
                         gameopen, running = False, False
                     elif event.key == pygame.K_RIGHT:
                         pinball[2:3] = [-8, -20]
                     elif event.key == pygame.K_LEFT:
                         pinball[2:3] = [8, -20]
-                    elif event.key == pygame.K_z:
+                    elif event.mod == pygame.KMOD_LSHIFT:
                         flipper_l = True
-                    elif event.key == pygame.K_KP_DIVIDE:
+                    elif event.mod == pygame.KMOD_RSHIFT:
                         flipper_r = True
-                elif event.type == pygame.KEYUP:
-                    if event.key == pygame.K_z:
-                        flipper_l = False
-                    elif event.key == pygame.K_KP_DIVIDE:
-                        flipper_r = False
+                else:
+                    flipper_l = False
+                    flipper_r = False
+
             # Edge Collisions
             if bouncing:
                 bouncing = False
@@ -111,34 +112,41 @@ def play():
                     pinball[2] = 3
                     pinball[1] = bottombound - size
                     bouncing = True
-                    pinball[1], stuck = 300, False
+                    # pinball[1], stuck = 300, False
                 elif pinball[1] - size < topbound:
                     pinball[3] = round(pinball[3]/-2)
                     pinball[1] = topbound + size
                     bouncing = True
+
+            # Slides and Flippers Collisions
+            if 620 + round((pinball[0])*0.1875) < pinball[1] \
+                    or 780 + round((480-pinball[0])*-0.1875) < pinball[1]:  # is the ball on (under) the slope
+                if pinball[0] < slide_size+40:  # Left slide
+                    stuck = True
+                    pinball[0] += 4
+                    pinball[1] = 620 + round(pinball[0]*0.1875)
+                    if flipper_l and pinball[0] > slide_size:
+                        pinball[1] -= 40
+                        pinball[2] = (pinball[0]-200)
+                        pinball[3] = (pinball[0]-200)
+                        stuck = False
+                elif (slide_size << 1)-40 < pinball[0] < rightbound:
+                    stuck = True
+                    pinball[0] -= 4
+                    pinball[1] = 740 + round((480-pinball[0])*-0.1875)
+                    if flipper_l and pinball[0] > 260:
+                        pinball[1] -= 40
+                        pinball[2] = (280-pinball[0])
+                        pinball[3] = (280-pinball[0])
+                        stuck = False
+            else:
+                stuck = False
+
             # Bumper Collisions & Display
             for i in range(len(bumpers)):
                 bumpers[i].update()
                 pygame.draw.circle(screen, bumpers[i].color, (bumpers[i].x, bumpers[i].y), bumpersize, bumpersize)
-            # Slides and Flippers Collisions
-            print(600 - round((leftbound - pinball[0]) / 2))
-            if pinball[1] > (600 + round((leftbound - pinball[0]) * 0.1875)) \
-                    or pinball[1] > (600 - round((leftbound - pinball[0] / 2))):
-                # Flipper Collisions
-                if 650 < pinball[1] < 690:
-                    if flipper_l and 180 < pinball[0] < 220:
-                        pinball[2] = pinball[0] - 200
-                        pinball[3] = pinball[0] - 220
-                        pinball[1] = 620
-                    elif flipper_r and 260 < pinball[0] < 300:
-                        pinball[2] = pinball[0] - 280
-                        pinball[3] = pinball[0] - 260
-                        pinball[1] = 620
-                    else:
-                        pass
-                stuck = True
-                pinball[0] += 4
-                pinball[1] = (600 - round((leftbound - pinball[0] / 2))) + size
+
             # Update Ball
             if pinball[1] < bottombound and not stuck:
                 pinball[3] += 0.2
@@ -148,7 +156,7 @@ def play():
             # Display Game Elements
             # Ball
             pygame.draw.circle(screen, (230, 230, 230), (pinball[0], pinball[1]), size, size)
-            # Slides
+            # Slides    y = 0.1875x
             pygame.draw.line(screen, (128, 128, 128),
                              (leftbound, bottombound - 60),
                              (slide_size, bottombound - 30), 5)
