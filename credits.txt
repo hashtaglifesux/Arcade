@@ -1,0 +1,4 @@
+mxSplinter.ttf: mitxela.com/projects/fonts
+7seg.otf: u/IdealNarrow - reddit.com/r/Woovebox/comments/1e26ofo/comment/ld2o7g1/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+VT323.ttf: fonts.google.com/specimen/VT323
+mancala.png: Yellow Mountain Imports - ymimports.com/collections/mancala/products/sn-mc002-a
